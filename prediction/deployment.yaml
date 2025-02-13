@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: streamlit-app
-          image: angel/testing_ui:latest
+          image: zerook2005/testing_ui:latest
           ports:
             - containerPort: 8501
           volumeMounts:
@@ -24,16 +24,3 @@ spec:
         - name: saved-model
           persistentVolumeClaim:
             claimName: saved-model-pvc
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: streamlit-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: streamlit-app
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8501
