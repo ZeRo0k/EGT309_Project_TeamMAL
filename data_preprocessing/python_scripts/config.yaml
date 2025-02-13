@@ -1,0 +1,28 @@
+# Configuration for data preprocessing pipeline
+
+paths:
+  raw_train: /datasets/raw_datasets/train.csv
+  raw_test: /datasets/raw_datasets/test.csv
+  cleaned_train: /datasets/cleaned_datasets/cleaned_train_data.csv
+  cleaned_test: /datasets/cleaned_datasets/cleaned_test_data.csv
+
+features:
+  imputation:
+    - Age
+    - Pclass
+    - SibSp
+    - Parch
+    - Fare
+  title_categories:
+    - Mr
+    - Mrs
+    - Miss
+    - Master
+  fare_bins: [-1, 10, 20, 50, 100, 1000]
+  fare_labels: [0, 1, 2, 3, 4]
+  age_bins: [0, 5, 13, 20, 40, 60, 100]
+  age_labels: [0, 1, 2, 3, 4, 5]
+  columns_to_drop:
+    - PassengerId
+    - Ticket
+    - Name

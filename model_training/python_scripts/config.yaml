@@ -1,0 +1,24 @@
+paths:
+  cleaned_train: "/datasets/cleaned_datasets/cleaned_train_data.csv"
+  model_output: "/saved_model/first_model.pkl"
+
+parameters:
+  target_column: "Survived"
+  test_size: 0.2
+  random_state: 42
+
+fine_tuning:
+  logistic_regression:
+    C: 0.5
+    penalty: "l1"
+    solver: "saga"
+    max_iter: 5000
+  random_forest:
+    n_estimators: 500
+    max_depth: 15
+    min_samples_split: 10
+  gradient_boosting:
+    n_estimators: 300
+    max_depth: 6
+    min_samples_split: 10
+    learning_rate: 0.1
