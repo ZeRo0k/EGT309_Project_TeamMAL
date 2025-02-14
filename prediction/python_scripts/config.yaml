@@ -1,0 +1,11 @@
+paths:
+  saved_model: "../saved_model/optimized_model.pkl"  # Path to saved model
+
+features:
+  input_features:
+    - Pclass
+    - Sex
+    - Age
+    - SibSp
+    - Parch
+    - Fare
