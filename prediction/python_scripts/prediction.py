@@ -3,23 +3,20 @@ import pandas as pd
 import yaml
 import os
 
-# Determine execution environment (Kubernetes vs Local)
+# ✅ Load configuration from YAML file
+current_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(current_dir, "config.yaml")
+
+with open(config_path, "r") as file:
+    config = yaml.safe_load(file)
+
+# ✅ Determine execution environment (Kubernetes vs Local)
 RUNNING_IN_K8S = os.getenv("MODEL_PATH") is not None
 
-if not RUNNING_IN_K8S:
-    # Local Execution - Load YAML config
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(current_dir, "prediction_config.yaml")
+# ✅ Set mfodel file path
+MODEL_PATH = os.getenv("MODEL_PATH") if RUNNING_IN_K8S else os.path.join(current_dir, config["paths"]["saved_model"])
 
-    with open(config_path, "r") as file:
-        config = yaml.safe_load(file)
-
-    MODEL_PATH = os.path.join(current_dir, config["paths"]["saved_model"])
-else:
-    # Kubernetes Execution - Load from Environment Variables
-    MODEL_PATH = os.getenv("MODEL_PATH")
-
-# Load Model
+# ✅ Load the model
 try:
     with open(MODEL_PATH, "rb") as file:
         model = pickle.load(file)
@@ -28,7 +25,7 @@ except FileNotFoundError:
     print(f"❌ Error: Model file not found at {MODEL_PATH}")
     exit(1)
 
-# Get User Input
+# ✅ Get User Input (Interactive Mode)
 def get_user_input():
     print("\n💡 Enter Passenger Details for Survival Prediction:\n")
     pclass = int(input("Pclass (1/2/3): "))
@@ -41,25 +38,25 @@ def get_user_input():
     # Convert categorical to numerical
     sex = 1 if sex == "male" else 0
 
-    # Create DataFrame
+    # Create DataFrame with expected feature names
     data = pd.DataFrame([[pclass, sex, age, sibsp, parch, fare]], 
-                        columns=["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare"])
+                        columns=config["features"]["input_features"])
     return data
 
-# Make Prediction
+# ✅ Make Prediction
 def make_prediction(data):
     prediction = model.predict(data)
     result = "✅ Survived" if prediction[0] == 1 else "❌ Did Not Survive"
     return result
 
-# CLI Execution
+# ✅ CLI Execution
 def cli_mode():
     """Runs CLI-based prediction."""
     data = get_user_input()
     result = make_prediction(data)
     print("\n🛳 Prediction:", result)
 
-# Batch File Prediction Mode
+# ✅ Batch File Prediction Mode
 def batch_mode(file_path):
     """Runs batch prediction on a CSV file."""
     try:
@@ -73,6 +70,7 @@ def batch_mode(file_path):
     except Exception as e:
         print(f"❌ Error processing batch file: {e}")
 
+# ✅ Main Execution Logic
 if __name__ == "__main__":
     mode = input("\n🔍 Select mode (1: Interactive CLI, 2: Batch CSV Prediction): ").strip()
     
