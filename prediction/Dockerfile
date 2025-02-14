@@ -10,11 +10,10 @@ COPY . /app
 # Copy the requirements file and install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the saved model into the container
-COPY ../saved_model /app/saved_model
-
 # Expose the Streamlit port
 EXPOSE 8501
 
 # Command to run the application
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+
+ENTRYPOINT ["python", "-m", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
