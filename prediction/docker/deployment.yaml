@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prediction-deployment
+  labels:
+    app: prediction
+spec:
+  replicas: 1  # Only 1 replica needed for prediction???
+  selector:
+    matchLabels:
+      app: prediction
+  template:
+    metadata:
+      labels:
+        app: prediction
+    spec:
+      containers:
+        - name: prediction-container
+          image: zerook2005/prediction-image:latest  # Update image name if needed
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: saved-model
+              mountPath: "/app/saved_model"
+          envFrom:
+            - configMapRef:
+                name: prediction-config
+          command: ["python"]
+          args: ["prediction.py"]
+      volumes:
+        - name: saved-model
+          persistentVolumeClaim:
+            claimName: saved-model-pvc  # Uses PVC for saved model
