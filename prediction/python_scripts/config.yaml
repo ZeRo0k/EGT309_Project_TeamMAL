@@ -1,5 +1,5 @@
 paths:
-  saved_model: "../saved_model/optimized_model.pkl"  # Path to saved model
+  saved_model: "../../saved_model/optimized_model.pkl"
 
 features:
   input_features:
@@ -9,3 +9,8 @@ features:
     - SibSp
     - Parch
     - Fare
+    - Embarked
+    - Title
+    - Family Size
+    - Fare Group
+    - Age Group

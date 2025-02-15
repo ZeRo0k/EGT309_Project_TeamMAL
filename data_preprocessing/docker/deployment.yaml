@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: data-preprocessing-container
-          image: zerook2005/data-preprocessing:latest # Replace with actual image name
+          image: zerook2005/data-preprocessing:latest
           imagePullPolicy: IfNotPresent
           command:
             [

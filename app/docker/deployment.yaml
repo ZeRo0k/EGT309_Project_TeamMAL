@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: streamlit-app
+  labels:
+    app: streamlit-app
 spec:
   replicas: 2
   selector:
@@ -15,12 +17,28 @@ spec:
       containers:
         - name: streamlit-app
           image: zerook2005/testing_ui:latest
+          imagePullPolicy: Never
+          command:
+            [
+              "streamlit",
+              "run",
+              "/app/python_scripts/app.py",
+              "--server.port=8501",
+              "--server.address=0.0.0.0",
+            ]
+          resources: # Resource allocation for the container
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
           ports:
             - containerPort: 8501
           volumeMounts:
-            - name: saved-model
-              mountPath: /app/saved_model
+            - name: saved-models
+              mountPath: /saved_model
       volumes:
-        - name: saved-model
+        - name: saved-models
           persistentVolumeClaim:
             claimName: saved-model-pvc

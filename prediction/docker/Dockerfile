@@ -11,4 +11,7 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Set the default command for the container
-CMD ["python", "/app/prediction.py"]
+CMD ["python", "python_scripts/prediction.py"]
+
+
+

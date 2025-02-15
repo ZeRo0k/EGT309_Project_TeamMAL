@@ -2,6 +2,7 @@ import pickle
 import pandas as pd
 import yaml
 import os
+import joblib
 
 # ✅ Load configuration from YAML file
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,13 +14,16 @@ with open(config_path, "r") as file:
 # ✅ Determine execution environment (Kubernetes vs Local)
 RUNNING_IN_K8S = os.getenv("MODEL_PATH") is not None
 
-# ✅ Set mfodel file path
+# ✅ Set model file path
 MODEL_PATH = os.getenv("MODEL_PATH") if RUNNING_IN_K8S else os.path.join(current_dir, config["paths"]["saved_model"])
+
+# ✅ Debugging Output
+print(f"🔍 Looking for model at: {MODEL_PATH}")
 
 # ✅ Load the model
 try:
     with open(MODEL_PATH, "rb") as file:
-        model = pickle.load(file)
+        model = joblib.load(file)  # Use joblib instead of pickle for sklearn models
     print("✅ Model loaded successfully!")
 except FileNotFoundError:
     print(f"❌ Error: Model file not found at {MODEL_PATH}")
@@ -29,19 +33,53 @@ except FileNotFoundError:
 def get_user_input():
     print("\n💡 Enter Passenger Details for Survival Prediction:\n")
     pclass = int(input("Pclass (1/2/3): "))
-    sex = input("Sex (male/female): ").strip().lower()
+
+    # Ensure valid input for sex
+    while True:
+        sex = input("Sex (male/female): ").strip().lower()
+        if sex in ["male", "female"]:
+            break
+        print("❌ Invalid input. Please enter 'male' or 'female'.")
+
     age = float(input("Age: "))
     sibsp = int(input("Siblings/Spouses aboard: "))
     parch = int(input("Parents/Children aboard: "))
     fare = float(input("Fare Paid: "))
 
-    # Convert categorical to numerical
+    # Ensure valid input for embarked
+    while True:
+        embarked = input("Embarked (S/C/Q): ").strip().upper()
+        if embarked in ["S", "C", "Q"]:
+            embarked = {"S": 0, "C": 1, "Q": 2}[embarked]
+            break
+        print("❌ Invalid input. Please enter 'S', 'C', or 'Q'.")
+
+    # Convert categorical variables to numerical
     sex = 1 if sex == "male" else 0
 
-    # Create DataFrame with expected feature names
-    data = pd.DataFrame([[pclass, sex, age, sibsp, parch, fare]], 
+    # Extract Title (since Name is missing, assume based on Sex)
+    title = 0 if sex == 1 else 2  # Assume "Mr" for male (0), "Miss" for female (2)
+
+    # Compute Family Size
+    family_size = sibsp + parch
+
+    # Apply binning for Age Group
+    age_bins = [0, 5, 13, 20, 40, 60, 100]
+    age_labels = [0, 1, 2, 3, 4, 5]
+    age_group = pd.cut([age], bins=age_bins, labels=age_labels).astype(float)[0]
+
+    # Apply binning for Fare Group
+    fare_bins = [-1, 10, 20, 50, 100, 1000]
+    fare_labels = [0, 1, 2, 3, 4]
+    fare_group = pd.cut([fare], bins=fare_bins, labels=fare_labels).astype(float)[0]
+
+    # Create DataFrame with expected features
+    data = pd.DataFrame([[pclass, sex, age, sibsp, parch, fare, embarked, title, family_size, fare_group, age_group]], 
                         columns=config["features"]["input_features"])
+
     return data
+
+
 
 # ✅ Make Prediction
 def make_prediction(data):
