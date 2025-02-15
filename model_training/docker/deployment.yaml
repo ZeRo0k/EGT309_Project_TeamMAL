@@ -17,7 +17,7 @@ spec:
       containers:
         - name: model-training-container
           image: zerook2005/model-training:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           command:
             ["/bin/sh", "-c", "python3 /app/python_scripts/model_training.py"]
           resources:

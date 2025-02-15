@@ -1,24 +1,26 @@
-import pickle
 import pandas as pd
 import yaml
 import os
 import joblib
+import sys
 
-# ✅ Load configuration from YAML file
+# Load config
 current_dir = os.path.dirname(os.path.abspath(__file__))
-config_path = os.path.join(current_dir, "config.yaml")
+config_path = os.path.join(current_dir, 'config.yaml')
 
-with open(config_path, "r") as file:
+with open(config_path, 'r') as file:
     config = yaml.safe_load(file)
 
-# ✅ Determine execution environment (Kubernetes vs Local)
-RUNNING_IN_K8S = os.getenv("MODEL_PATH") is not None
+MODEL_PATH = config["paths"]["saved_model"]
 
-# ✅ Set model file path
-MODEL_PATH = os.getenv("MODEL_PATH") if RUNNING_IN_K8S else os.path.join(current_dir, config["paths"]["saved_model"])
+# Debugging: Print the resolved model path
+print(f"🔍 Checking model path: {MODEL_PATH}")
 
-# ✅ Debugging Output
-print(f"🔍 Looking for model at: {MODEL_PATH}")
+# Ensure the model file exists
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError(f"❌ Error: Model file not found at {MODEL_PATH}")
+
+print("✅ Model found! Loading...")
 
 # ✅ Load the model
 try:
@@ -80,7 +82,6 @@ def get_user_input():
     return data
 
 
-
 # ✅ Make Prediction
 def make_prediction(data):
     prediction = model.predict(data)
@@ -110,12 +111,7 @@ def batch_mode(file_path):
 
 # ✅ Main Execution Logic
 if __name__ == "__main__":
-    mode = input("\n🔍 Select mode (1: Interactive CLI, 2: Batch CSV Prediction): ").strip()
-    
-    if mode == "1":
-        cli_mode()
-    elif mode == "2":
-        file_path = input("📂 Enter CSV file path: ").strip()
-        batch_mode(file_path)
+    if len(sys.argv) > 1 and sys.argv[1] == "--batch":
+        batch_mode(sys.argv[2])  # Pass CSV path as argument
     else:
-        print("❌ Invalid choice! Please select 1 or 2.")
+        cli_mode()  # For local testing only

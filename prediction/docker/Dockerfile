@@ -5,13 +5,13 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Copy all project files into the container
-COPY . .
+COPY ./prediction /app
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the shared requirements.txt from the parent directory
+COPY ./requirements.txt /app/requirements.txt
+
+# Install dependencies
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Set the default command for the container
-CMD ["python", "python_scripts/prediction.py"]
-
-
-
+CMD ["python3", "python_scripts/prediction.py"]

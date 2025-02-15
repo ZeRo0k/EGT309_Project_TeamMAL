@@ -5,7 +5,7 @@ metadata:
   labels:
     app: prediction
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: prediction
@@ -17,13 +17,18 @@ spec:
       containers:
         - name: prediction-container
           image: zerook2005/prediction-image:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
+          command:
+            [
+              "python3",
+              "/app/python_scripts/prediction.py",
+              "--batch",
+              "/saved_model/input.csv",
+            ]
           volumeMounts:
-            - name: saved-model
-              mountPath: "/app/saved_model"
-          command: ["python"]
-          args: ["python_scripts/prediction.py"]
+            - name: saved-models
+              mountPath: /saved_model
       volumes:
-        - name: saved-model
+        - name: saved-models
           persistentVolumeClaim:
-            claimName: saved-model-pvc # Uses PVC for saved model
+            claimName: saved-model-pvc

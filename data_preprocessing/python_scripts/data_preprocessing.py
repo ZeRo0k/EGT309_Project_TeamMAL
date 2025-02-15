@@ -17,9 +17,7 @@ with open(config_path, "r") as file:
 
 # File paths from config
 train_data_path = config["paths"]["raw_train"]
-test_data_path = config["paths"]["raw_test"]
 cleaned_train_path = config["paths"]["cleaned_train"]
-cleaned_test_path = config["paths"]["cleaned_test"]
 
 # Load parameters
 features_for_imputation = config["features"]["imputation"]
@@ -80,12 +78,11 @@ def drop_columns(data):
 def preprocessing_pipeline():
     """Execute the complete preprocessing pipeline."""
     # Ensure data paths exist
-    if not os.path.exists(train_data_path) or not os.path.exists(test_data_path):
-        raise FileNotFoundError(f"❌ Train or test data files not found in {train_data_path} or {test_data_path}")
+    if not os.path.exists(train_data_path):
+        raise FileNotFoundError(f"❌ Train data file not found in {train_data_path}")
 
     print("📂 Loading datasets...", flush=True)
     train_data = pd.read_csv(train_data_path)
-    test_data = pd.read_csv(test_data_path)
     print("✅ Datasets loaded successfully!", flush=True)
 
     # Apply preprocessing steps in sequence
@@ -95,19 +92,12 @@ def preprocessing_pipeline():
     train_data = feature_engineering(train_data)
     train_data = drop_columns(train_data)
 
-    print("\n🔄 Preprocessing test dataset...", flush=True)
-    test_data = clean_null(test_data)
-    test_data = data_transformation(test_data)
-    test_data = feature_engineering(test_data)
-
     # Ensure directories exist before saving
     os.makedirs(os.path.dirname(cleaned_train_path), exist_ok=True)
-    os.makedirs(os.path.dirname(cleaned_test_path), exist_ok=True)
 
     # Save cleaned datasets
     train_data.to_csv(cleaned_train_path, index=False)
-    test_data.to_csv(cleaned_test_path, index=False)
-    print(f"✅ Cleaned datasets saved:\n- {cleaned_train_path}\n- {cleaned_test_path}", flush=True)
+    print(f"✅ Cleaned datasets saved:\n- {cleaned_train_path}", flush=True)
 
     # Output summary
     print("\n📊 Preprocessed Data Summary:", flush=True)
@@ -115,11 +105,6 @@ def preprocessing_pipeline():
     print(train_data.head(), flush=True)
     print("\nTrain Dataset Info:", flush=True)
     print(train_data.info(), flush=True)
-
-    print("\nTest Dataset Overview:", flush=True)
-    print(test_data.head(), flush=True)
-    print("\nTest Dataset Info:", flush=True)
-    print(test_data.info(), flush=True)
 
     print("\n✅ Data Preprocessing Completed!", flush=True)
     exit(0)
