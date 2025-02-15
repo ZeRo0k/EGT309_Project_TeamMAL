@@ -1,17 +1,14 @@
 # Use the official Python image
 FROM python:3.10-slim
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy Python scripts including app.py and config.yaml
-COPY app/python_scripts /app/python_scripts
+# Copy files
+COPY . /app
 
 # Copy the requirements file and install dependencies
 RUN pip install --no-cache-dir -r /app/python_scripts/requirements.txt
-
-# Copy the saved model into the container
-COPY saved_model /app/saved_model
 
 # Expose the Streamlit port
 EXPOSE 8501
