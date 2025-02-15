@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: model-training-config
+data:
+  CLEANED_TRAIN_PATH: "/datasets/cleaned_datasets/cleaned_train_data.csv"
+  MODEL_OUTPUT_PATH: "/saved_model/first_model.pkl"
+  TARGET_COLUMN: "Survived"
+  TEST_SIZE: "0.2"
+  RANDOM_STATE: "42"

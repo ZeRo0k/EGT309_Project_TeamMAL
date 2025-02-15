@@ -1,19 +1,16 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: model-training-deployment
+  name: model-training-job
   labels:
     app: model-training
 spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: model-training
   template:
     metadata:
       labels:
         app: model-training
     spec:
+      restartPolicy: Never
       containers:
         - name: model-training-container
           image: thisisangelz/model-training:latest
