@@ -1,19 +1,16 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: model-optimization-deployment
+  name: model-optimization-job
   labels:
     app: model-optimization
 spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: model-optimization
   template:
     metadata:
       labels:
         app: model-optimization
     spec:
+      restartPolicy: Never
       containers:
         - name: model-optimization-container
           image: thisisangelz/model-optimization:latest
