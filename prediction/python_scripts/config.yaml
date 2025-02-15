@@ -1,0 +1,16 @@
+paths:
+  saved_model: "/saved_model/optimized_model.pkl"
+
+features:
+  input_features:
+    - Pclass
+    - Sex
+    - Age
+    - SibSp
+    - Parch
+    - Fare
+    - Embarked
+    - Title
+    - Family Size
+    - Fare Group
+    - Age Group

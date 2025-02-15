@@ -1,0 +1,4 @@
+pandas
+pyyaml
+scikit-learn==1.5.2  
+joblib
