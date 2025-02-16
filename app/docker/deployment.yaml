@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: streamlit-app
-          image: zerook2005/testing_ui:latest
+          image: zerook2005/app:latest
           imagePullPolicy: IfNotPresent
           command:
             [
