@@ -5,12 +5,13 @@ metadata:
   labels:
     app: model-optimization
 spec:
+  backoffLimit: 3 # Self Healing
   template:
     metadata:
       labels:
         app: model-optimization
     spec:
-      restartPolicy: Never
+      restartPolicy: OnFailure # Restart if fails
       containers:
         - name: model-optimization-container
           image: zerook2005/model-optimization:latest

@@ -5,12 +5,13 @@ metadata:
   labels:
     app: data-preprocessing
 spec:
+  backoffLimit: 3 # Self Healing
   template:
     metadata:
       labels:
         app: data-preprocessing
     spec:
-      restartPolicy: Never # Ensures the job runs only once per pod
+      restartPolicy: OnFailure # Restart if fails
       containers:
         - name: data-preprocessing-container
           image: zerook2005/data-preprocessing:latest

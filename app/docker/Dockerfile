@@ -8,6 +8,7 @@ WORKDIR /app
 COPY ./app/python_scripts /app/python_scripts
 COPY ./app/docker /app/docker
 COPY ./requirements.txt /app/requirements.txt
+COPY ./data_preprocessing /app/data_preprocessing
 
 # Install dependencies
 RUN pip install --no-cache-dir -r /app/requirements.txt

@@ -5,12 +5,13 @@ metadata:
   labels:
     app: model-training
 spec:
+  backoffLimit: 3 # Self Healing
   template:
     metadata:
       labels:
         app: model-training
     spec:
-      restartPolicy: Never
+      restartPolicy: OnFailure # Restart if fails
       containers:
         - name: model-training-container
           image: zerook2005/model-training:latest

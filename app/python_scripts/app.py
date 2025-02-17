@@ -3,9 +3,9 @@ import joblib
 import pandas as pd
 import os
 import yaml
-from sklearn.impute import KNNImputer
 
-# Import preprocessing functions from data_preprocessing.py
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'data_preprocessing', 'python_scripts'))
 from data_preprocessing import clean_null, data_transformation, feature_engineering, drop_columns
 
 # Load config
@@ -127,8 +127,8 @@ elif app_mode == "Batch Prediction":
         def preprocess_batch_data(file_df):
 
             # Separate the columns into numeric and categorical
-            numeric_columns = file_df.select_dtypes(include=["number"]).columns
-            categorical_columns = file_df.select_dtypes(exclude=["number"]).columns
+            # numeric_columns = file_df.select_dtypes(include=["number"]).columns
+            # categorical_columns = file_df.select_dtypes(exclude=["number"]).columns
 
             # Apply preprocessing steps to the batch data
             file_df = clean_null(file_df)

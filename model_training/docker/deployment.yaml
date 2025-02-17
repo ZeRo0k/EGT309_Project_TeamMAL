@@ -1,43 +1,43 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: model-training-deployment
-  labels:
-    app: model-training
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: model-training
-  template:
-    metadata:
-      labels:
-        app: model-training
-    spec:
-      containers:
-        - name: model-training-container
-          image: zerook2005/model-training:latest
-          imagePullPolicy: Never
-          command:
-            ["/bin/sh", "-c", "python3 /app/python_scripts/model_training.py"]
-          resources:
-            requests:
-              memory: "512Mi"
-              cpu: "500m"
-            limits:
-              memory: "1Gi"
-              cpu: "1"
-          volumeMounts:
-            - name: cleaned-data
-              mountPath: "/datasets/cleaned_datasets"
-              readOnly: false
-            - name: saved-models
-              mountPath: "/saved_model"
-              readOnly: false
-      volumes:
-        - name: cleaned-data
-          persistentVolumeClaim:
-            claimName: cleaned-data-pvc
-        - name: saved-models
-          persistentVolumeClaim:
-            claimName: saved-model-pvc
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: model-training-deployment
+#   labels:
+#     app: model-training
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: model-training
+#   template:
+#     metadata:
+#       labels:
+#         app: model-training
+#     spec:
+#       containers:
+#         - name: model-training-container
+#           image: zerook2005/model-training:latest
+#           imagePullPolicy: Never
+#           command:
+#             ["/bin/sh", "-c", "python3 /app/python_scripts/model_training.py"]
+#           resources:
+#             requests:
+#               memory: "512Mi"
+#               cpu: "500m"
+#             limits:
+#               memory: "1Gi"
+#               cpu: "1"
+#           volumeMounts:
+#             - name: cleaned-data
+#               mountPath: "/datasets/cleaned_datasets"
+#               readOnly: false
+#             - name: saved-models
+#               mountPath: "/saved_model"
+#               readOnly: false
+#       volumes:
+#         - name: cleaned-data
+#           persistentVolumeClaim:
+#             claimName: cleaned-data-pvc
+#         - name: saved-models
+#           persistentVolumeClaim:
+#             claimName: saved-model-pvc
