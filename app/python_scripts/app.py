@@ -6,7 +6,7 @@ import yaml
 from sklearn.impute import KNNImputer
 
 # Import preprocessing functions from data_preprocessing.py
-from data_preprocessing import clean_null, data_transformation, feature_engineering, drop_columns
+from data_preprocessing.python_scripts.data_preprocessing import clean_null, data_transformation, feature_engineering, drop_columns
 
 # Load config
 current_dir = os.path.dirname(os.path.abspath(__file__))
