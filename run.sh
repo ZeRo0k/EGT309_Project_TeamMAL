@@ -2,7 +2,7 @@
 
 # Start Minikube and configure Docker
 echo "Starting Minikube..."
-minikube start
+minikube start --memory 4096 --cpus 2
 eval $(minikube docker-env)
 
 # Create necessary directories in Minikube
@@ -62,8 +62,16 @@ echo "Checking status of Kubernetes resources..."
 kubectl get pods
 kubectl get services
 
-# Open the Streamlit app
-echo "Launching Streamlit app..."
-minikube service streamlit-service
+# Wait for Streamlit pods to be ready
+echo "Waiting for Streamlit pods to become ready..."
+kubectl wait --for=condition=ready pod --selector=app=streamlit-app --timeout=120s
+
+# Port forward the Streamlit app
+echo "Port forwarding Streamlit app to localhost:8501..."
+kubectl port-forward service/streamlit-service 8501:8501 &
 
 echo "Minikube setup, Docker image build, and application deployment completed!"
+echo "Open URL below in your browser"
+echo "http://127.0.0.1:8501"
+
+

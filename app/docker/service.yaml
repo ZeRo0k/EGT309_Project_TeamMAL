@@ -3,11 +3,12 @@ kind: Service
 metadata:
   name: streamlit-service
 spec:
-  type: NodePort
+  type: LoadBalancer
+  externalTrafficPolicy: Local
   selector:
     app: streamlit-app
   ports:
     - protocol: TCP
-      port: 8501 # External port for the service
-      targetPort: 8501 # Matches containerPort in deployment
-      nodePort: 30001 # Exposed port on the node (between 30000-32767)
+      port: 8501
+      targetPort: 8501
+  sessionAffinity: ClientIP
