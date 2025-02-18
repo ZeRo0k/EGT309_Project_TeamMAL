@@ -6,24 +6,3 @@ parameters:
   target_column: "Survived" # Target variable
   test_size: 0.2 # 80% is for training; 20% for testing
   random_state: 42
-
-# fine_tuning:
-#   # Logistic Regression
-#   logistic_regression:
-#     C: 0.5 # Regularization strength
-#     penalty: "l1" # L1 regularization for feature selection
-#     solver: "saga" # Supports L1 regularization and is suitable for large datasets.
-#     max_iter: 5000 # Maximum iterations for convergence
-
-#   # Random Forest
-#   random_forest:
-#     n_estimators: 500 # Number of trees
-#     max_depth: 15 # Limits tree depth to control overfitting
-#     min_samples_split: 10 # Minimum number of samples required to split a node
-
-#   # Gradient Boosting
-#   gradient_boosting:
-#     n_estimators: 300 # Number of boosting stages
-#     max_depth: 6 # Restricts tree depth to prevent overfitting
-#     min_samples_split: 10 # Minimum samples needed to split a node
-#     learning_rate: 0.1 # Step size for updates
