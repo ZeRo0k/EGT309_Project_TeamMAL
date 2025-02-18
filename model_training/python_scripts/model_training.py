@@ -138,7 +138,7 @@ def modeling_pipeline():
 
     print("\n📂 Loading dataset...")
     cleaned_train_data = pd.read_csv(cleaned_train_data_path)
-    print("✅ Dataset loaded!")
+    print("✅ Dataset loaded!\n")
 
     X_train, X_test, y_train, y_test = split_data(cleaned_train_data, target_column, test_size, random_state)
 
@@ -147,6 +147,12 @@ def modeling_pipeline():
         "random_forest": train_model(X_train, y_train, "random_forest"),
         "gradient_boosting": train_model(X_train, y_train, "gradient_boosting"),
     }
+
+    # Evaluate each model
+    print("\n📊 Model Evaluation:")
+    for model_name, model in models.items():
+        print(f"\n🔍 Evaluating {model_name}...")
+        evaluate_model(model, X_test, y_test)
 
     for model_name, model in models.items():
         model_path = os.path.join(model_output_path, f"{model_name}.pkl")
