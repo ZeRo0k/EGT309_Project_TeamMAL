@@ -23,7 +23,7 @@ spec:
       restartPolicy: OnFailure # Restart if fails
       containers:
         - name: model-training-container  # Name of the container running the training task
-          image: yjmockkk/model-training:latest # Docker image to be used
+          image: zerook2005/model-training:latest # Docker image to be used
           imagePullPolicy: IfNotPresent # Pull image only if not available locally 
           
           command: # Command to execute within the container
