@@ -1,3 +1,10 @@
+# This file defines a LoadBalancer service to expose the Streamlit web app.
+#
+# Key Features:
+# - Uses LoadBalancer to provide external access.
+# - Forwards TCP traffic on port 8501.
+# - Uses ClientIP session affinity to maintain user state.
+
 apiVersion: v1
 kind: Service
 metadata:

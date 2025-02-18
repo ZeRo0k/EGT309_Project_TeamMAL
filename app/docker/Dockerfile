@@ -1,3 +1,12 @@
+# This file defines the containerized environment for running the Titanic 
+# survival prediction app using Streamlit.
+#
+# Key Features:
+# - Uses Python 3.10 Slim as a lightweight base image.
+# - Installs required dependencies.
+# - Copies preprocessing scripts to ensure feature consistency.
+# - Runs Streamlit on port 8501.
+
 # Base image
 FROM python:3.10-slim
 
