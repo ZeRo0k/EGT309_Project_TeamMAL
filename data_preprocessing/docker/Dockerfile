@@ -1,14 +1,19 @@
+# This Dockerfile defines the environment for the data preprocessing pipeline. 
+# It sets up a minimal Python environment, installs dependencies, and runs the preprocessing script automatically.
+
 # Base image
-FROM python:3.10-slim
+FROM python:3.10-slim 
 
 # Set working directory
 WORKDIR /app
 
-# Copy files
-COPY . /app
+# Copy the relevant directories and files
+COPY ./data_preprocessing/python_scripts /app/python_scripts
+COPY ./data_preprocessing/docker /app/docker
+COPY ./requirements.txt /app/requirements.txt
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r /app/python_scripts/requirements.txt
+# Install dependencies
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Entry point (modify as needed)
-CMD ["python", "python_scripts/data_preprocessing.py"]
+CMD ["python", "/app/python_scripts/data_preprocessing.py"]

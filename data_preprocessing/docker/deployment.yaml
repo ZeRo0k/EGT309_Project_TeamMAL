@@ -1,3 +1,12 @@
+# Note! This Deployment YAML is retained for reference, but the project uses a Job-based approach instead.
+#
+# This deployment file is responsible for managing the data preprocessing container within a Kubernetes cluster.
+# It defines the specifications for how the container should be deployed, including scaling, resource allocation, volume mounting, and execution commands.
+# - This deployment ensures that two replicas of the data preprocessing container run simultaneously.
+# - Kubernetes manages the pods and ensures high availability.
+ 
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,7 +25,7 @@ spec:
     spec:
       containers:
         - name: data-preprocessing-container
-          image: thisisangelz/data-preprocessing:latest # Replace with actual image name
+          image: thisisangelz/data-preprocessing:latest
           imagePullPolicy: IfNotPresent
           command:
             [
@@ -40,9 +49,6 @@ spec:
             - name: cleaned-data
               mountPath: "/datasets/cleaned_datasets"
               readOnly: false
-
-
-
       volumes:
         - name: raw-data
           persistentVolumeClaim:
@@ -50,5 +56,3 @@ spec:
         - name: cleaned-data
           persistentVolumeClaim:
             claimName: cleaned-data-pvc # Uses PVC for cleaned datasets
-
-
