@@ -154,6 +154,7 @@ def modeling_pipeline():
         print(f"\n🔍 Evaluating {model_name}...")
         evaluate_model(model, X_test, y_test)
 
+    # Save the model
     for model_name, model in models.items():
         model_path = os.path.join(model_output_path, f"{model_name}.pkl")
         save_model(model, model_path)
