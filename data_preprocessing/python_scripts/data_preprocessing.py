@@ -1,6 +1,6 @@
 # This script performs preprocessing on the Titanic dataset. The preprocessing steps include:
 # 1. Handling missing values (using KNN Imputer for Age and median for Fare).
-# 2. Transforming data (handling outliers for Age and Fare using the IQR method).
+# 2. Handling Outliers (for Age and Fare using the IQR method).
 # 3. Encoding categorical variables (Sex and Embarked).
 # 4. Feature engineering (creating Title, Family Size, Age Group, and Fare Group).
 # 5. Dropping unnecessary columns.
