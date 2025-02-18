@@ -12,26 +12,27 @@ model_type: ""
 
 # Logistic Regression Hyperparameters
 logistic_regression:
-  C: [0.1, 0.5, 1.0, 2.0] # Inverse of regularization strength
-  penalty: ["l1", "l2"] # Regularization norm
-  solver: ["saga"] # Solver for optimization
-  max_iter: [10000] # Maximum iterations
+  C: [0.01, 0.1, 0.5, 1.0]
+  penalty: ["elasticnet"]
+  solver: ["saga"]
+  l1_ratio: [0.1, 0.5, 0.7]
+  max_iter: [5000]
 
 # Random Forest Hyperparameters
 random_forest:
-  n_estimators: [100, 500, 1000] # Number of trees in the forest
-  max_depth: [10, 15, 20] # Maximum depth of each tree
-  min_samples_split: [5, 10] # Minimum samples to split a node
+  n_estimators: [50, 100, 200] # Fewer trees for faster training and less overfitting
+  max_depth: [5, 10, 15] # Lower depth for smaller datasets
+  min_samples_split: [2, 5] # Smaller splits due to limited data
 
 # Gradient Boosting Hyperparameters
 gradient_boosting:
-  n_estimators: [100, 300, 500] # Number of boosting stages
-  max_depth: [4, 6, 8] # Maximum depth of individual trees
-  min_samples_split: [5, 10] # Minimum samples to split a node
-  learning_rate: [0.05, 0.1, 0.2] # Step size shrinkage
+  n_estimators: [50, 100, 200] # Fewer boosting stages for smaller datasets
+  max_depth: [3, 4, 5] # Lower depth to avoid overfitting
+  min_samples_split: [2, 5] # Smaller splits for small datasets
+  learning_rate: [0.01, 0.05, 0.1] # Lower learning rate for stable training
 
 # Cross-Validation Settings
 cross_validation:
-  n_splits: 3 # Number of folds
-  shuffle: true # Shuffle data before splitting
-  random_state: 42 # Seed for reproducibility
+  n_splits: 7 # More folds for stable cross-validation on smaller data
+  shuffle: true
+  random_state: 42

@@ -4,10 +4,13 @@ import yaml
 import os
 import joblib
 import sys
-from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import ParameterGrid
+from sklearn.model_selection import StratifiedShuffleSplit
+
 
 # ✅ Force immediate log output (disable buffering)
 sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1)
@@ -41,13 +44,12 @@ def split_data(data, target_column, test_size, random_state):
 # ------------------------------------------------------------
 
 def train_model_with_fine_tuning(X_train, y_train, config):
-    cv_params = config["cross_validation"]
-
     logistic_regression_params = config["logistic_regression"]
     random_forest_params = config["random_forest"]
     gradient_boosting_params = config["gradient_boosting"]
+    cv_params = config["cross_validation"]
 
-    kfold = StratifiedKFold(n_splits=cv_params['n_splits'], shuffle=cv_params['shuffle'], random_state=cv_params['random_state'])
+    kfold = StratifiedShuffleSplit(n_splits=cv_params['n_splits'], test_size=test_size, random_state=cv_params['random_state'])
 
     base_models = {
         "logistic_regression": (LogisticRegression, logistic_regression_params),
@@ -58,19 +60,30 @@ def train_model_with_fine_tuning(X_train, y_train, config):
     best_models = {}
 
     for model_name, (model_class, param_grid) in base_models.items():
-        param_combinations = [dict(zip(param_grid.keys(), values)) for values in zip(*param_grid.values())]
+        param_combinations = list(ParameterGrid(param_grid))
 
         best_score = 0
         best_model = None
 
         for params in param_combinations:
-            model = model_class(**params)
-            scores = cross_val_score(model, X_train, y_train, cv=kfold, scoring='f1', n_jobs=-1)
-            mean_score = np.mean(scores)
+            scores = []
+            fold_models = []
+            print(f"🔍 Training {model_name} with parameters: {params}")
 
-            if mean_score > best_score:
-                best_score = mean_score
-                best_model = model
+            for train_index, test_index in kfold.split(X_train, y_train):
+                X_fold_train, X_fold_test = X_train.iloc[train_index], X_train.iloc[test_index]
+                y_fold_train, y_fold_test = y_train.iloc[train_index], y_train.iloc[test_index]
+
+                model = model_class(**params)
+                model.fit(X_fold_train, y_fold_train)
+                score = evaluate_model(model, X_fold_test, y_fold_test)
+                scores.append(score)
+                fold_models.append(model)
+
+            best_fold_index = np.argmax(scores)
+            if scores[best_fold_index] > best_score:
+                best_score = scores[best_fold_index]
+                best_model = fold_models[best_fold_index]
 
         best_model.fit(X_train, y_train)
         best_models[model_name] = best_model
@@ -78,12 +91,13 @@ def train_model_with_fine_tuning(X_train, y_train, config):
 
     voting_ensemble = VotingClassifier(
         estimators=[(name, model) for name, model in best_models.items()],
-        voting='soft',
+        voting='hard',
+        weights=[0.2, 1.5, 1.5],  # Logistic Regression (0.2), Random Forest (1.5), Gradient Boosting (1.5)
         n_jobs=-1
     )
 
     voting_ensemble.fit(X_train, y_train)
-    print("✅ Voting ensemble trained with best models.")
+    print("✅ Weighted voting ensemble trained with best models.")
     return voting_ensemble
 
 # ------------------------------------------------------------
