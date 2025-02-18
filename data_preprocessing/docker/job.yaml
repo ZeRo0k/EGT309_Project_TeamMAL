@@ -26,7 +26,7 @@ spec:
 
       containers:
         - name: data-preprocessing-container  # Name of the container running the preprocessing task
-          image: thisisangelz/data-preprocessing:latest  # Docker image to use for this job
+          image: zerook2005/data-preprocessing:latest  # Docker image to use for this job
           imagePullPolicy: IfNotPresent  # Pull image only if not available locally 
 
           command:  # Command to execute within the container

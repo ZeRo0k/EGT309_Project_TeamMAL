@@ -25,7 +25,7 @@
 #     spec:
 #       containers:
 #         - name: data-preprocessing-container
-#           image: thisisangelz/data-preprocessing:latest
+#           image: zerook2005/data-preprocessing:latest
 #           imagePullPolicy: IfNotPresent
 #           command:
 #             [
