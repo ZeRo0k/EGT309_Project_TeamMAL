@@ -1,23 +1,30 @@
-import pandas as pd
+# This Python script is designed to implement a machine learning pipeline that handles the following steps:
+# 1) Data Splitting: Splits the dataset into training and testing sets.
+# 2) Model Training: Trains multiple models (Logistic Regression, Random Forest, Gradient Boosting) using the training data.
+# 3) Evaluating Trained Models
+# 4) Model Evaluation: Evaluates the models based on their accuracy, precision, recall, and F1 score.
+# 5) Model Saving: Saves the trained models for later use.
+
+import pandas as pd 
+import joblib 
+import os  
+import sys  
+import yaml 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-import joblib
-import os
-import sys
-import yaml
 
-# ✅ Force immediate log output (disable buffering)
+# Force immediate log output (disable buffering)
 sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1)
 
 # Load configuration from YAML file
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
 with open(config_path, "r") as file:
-    config = yaml.safe_load(file)
+    config = yaml.safe_load(file) # Load configuration as a dictionary
 
-# Define paths and parameters from config
+# Extract paths and parameters from the configuration file
 cleaned_train_data_path = config["paths"]["cleaned_train"]
 model_output_path = config["paths"]["model_output"]
 target_column = config["parameters"]["target_column"]
@@ -28,6 +35,10 @@ fine_tuning_params = config["fine_tuning"]
 # ------------------------------------------------------------
 # Function 1: Splitting the Data for Training and Testing
 # ------------------------------------------------------------
+# The dataset is divided into features (X) and target variable (y). The "train_test_split" function is used to randomly partition
+# the data based on 80% for training and 20% for testing as defined in the "config.yaml". After that, the function returns four 
+# variables which are "X_train", "X_test", "y_train", and "y_test". A print statement indicates the successful completion of the 
+# data split. 
 
 def split_data(data, target_column, test_size, random_state):
     X = data.drop(columns=[target_column])
@@ -35,67 +46,45 @@ def split_data(data, target_column, test_size, random_state):
     print("✅ Data split into training and testing sets")
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
 
-
 # ------------------------------------------------------------
 # Function 2: Training the Model
 # ------------------------------------------------------------
+# This function trains a machine learning model based on the specified model_type. It takes in the training features (X_train), 
+# the target labels (y_train), and the type of model to train. The function supports three models: Logistic Regression (a baseline 
+# model for linear relationships), Random Forest (a robust ensemble method that captures non-linear patterns), and 
+# Gradient Boosting (a more sophisticated, iterative approach for improved accuracy). It selects the model based on the input, trains
+# it using the provided data, and returns the trained model. If an invalid model_type is provided, the function raises an error.
 
 def train_model(X_train, y_train, model_type):
+
+    # Define a dictionary of models to be trained, indexed by model type.
     models = {
         "logistic_regression": LogisticRegression(max_iter=1000, random_state=random_state),
         "random_forest": RandomForestClassifier(random_state=random_state),
         "gradient_boosting": GradientBoostingClassifier(random_state=random_state),
     }
 
+    # Check if the provided model type is valid. If not, raise an error.
     if model_type not in models:
         raise ValueError("❌ Invalid model_type.")
 
+    # Retrieve the corresponding model from the dictionary based on the provided model_type.
     model = models[model_type]
+
+    # Train the selected model using the training data (X_train, y_train).
     model.fit(X_train, y_train)
+
+    # Print a success message after the model is trained.
     print(f"✅ Model ({model_type}) trained successfully.")
+
+    # Return the trained model
     return model
 
-
 # ------------------------------------------------------------
-# Function 3: Training the Model with Fine-Tuning
+# Function 3: Evaluating trained models
 # ------------------------------------------------------------
-
-def train_model_with_fine_tuning(X_train, y_train, model_type, params):
-    if model_type == "logistic_regression":
-        model = LogisticRegression(
-            C=params.get("C", 1.0),
-            penalty=params.get("penalty", "l2"),
-            solver=params.get("solver", "saga"),
-            max_iter=params.get("max_iter", 5000),
-            class_weight="balanced",
-            random_state=random_state,
-        )
-    elif model_type == "random_forest":
-        model = RandomForestClassifier(
-            n_estimators=params.get("n_estimators", 200),
-            max_depth=params.get("max_depth", 10),
-            min_samples_split=params.get("min_samples_split", 10),
-            random_state=random_state,
-        )
-    elif model_type == "gradient_boosting":
-        model = GradientBoostingClassifier(
-            n_estimators=params.get("n_estimators", 200),
-            max_depth=params.get("max_depth", 10),
-            min_samples_split=params.get("min_samples_split", 10),
-            learning_rate=params.get("learning_rate", 0.1),
-            random_state=random_state,
-        )
-    else:
-        raise ValueError("❌ Invalid model_type.")
-
-    model.fit(X_train, y_train)
-    print(f"✅ Model ({model_type}) trained with fine-tuning.")
-    return model
-
-
-# ------------------------------------------------------------
-# Function 4: Evaluating trained models
-# ------------------------------------------------------------
+# This function Assesses the model’s performance using key classification metrics: accuracy, precision, recall, and F1-score. 
+# These metrics help in understanding how well the model generalizes to new data.
 
 def evaluate_model(model, X_test, y_test):
     y_pred = model.predict(X_test)
@@ -113,18 +102,35 @@ def evaluate_model(model, X_test, y_test):
 
 
 # ------------------------------------------------------------
-# Function 5: Saving the Best Model
+# Function 4: Saving the Trained Models
 # ------------------------------------------------------------
+# This function saves the trained model as a .pkl file to the specified output directory. If the directory doesn’t exist, 
+# it is created, and any existing model file is replaced to ensure the latest version is stored.
 
 def save_model(model, output_path):
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    directory = os.path.dirname(output_path)
+    
+    # Ensure `directory` is actually a directory, not a file
+    if not os.path.isdir(directory):
+        os.makedirs(directory, exist_ok=True)
+    
+    # Remove the existing file before saving a new model
+    if os.path.exists(output_path):
+        os.remove(output_path)
+
     joblib.dump(model, output_path)
     print(f"✅ Model saved to {output_path}")
+
 
 
 # ------------------------------------------------------------
 # Model Training Pipeline Execution
 # ------------------------------------------------------------
+# Executes the entire pipeline by:
+# 1) Loading the dataset from a predefined path.
+# 2) Splitting the data into training and testing sets.
+# 3) Training multiple models (Logistic Regression, Random Forest, Gradient Boosting).
+# 4) Saving the trained models for future use.
 
 def modeling_pipeline():
     if not os.path.exists(cleaned_train_data_path):
@@ -132,7 +138,7 @@ def modeling_pipeline():
 
     print("\n📂 Loading dataset...")
     cleaned_train_data = pd.read_csv(cleaned_train_data_path)
-    print("✅ Dataset loaded!")
+    print("✅ Dataset loaded!\n")
 
     X_train, X_test, y_train, y_test = split_data(cleaned_train_data, target_column, test_size, random_state)
 
@@ -142,18 +148,16 @@ def modeling_pipeline():
         "gradient_boosting": train_model(X_train, y_train, "gradient_boosting"),
     }
 
-    fine_tuned_models = {
-        model: train_model_with_fine_tuning(X_train, y_train, model, fine_tuning_params[model])
-        for model in fine_tuning_params
-    }
+    # Evaluate each model
+    print("\n📊 Model Evaluation:")
+    for model_name, model in models.items():
+        print(f"\n🔍 Evaluating {model_name}...")
+        evaluate_model(model, X_test, y_test)
 
-    scores = {model: evaluate_model(fine_tuned_models[model], X_test, y_test) for model in fine_tuned_models}
-    best_model_name = max(scores, key=scores.get)
-    best_model = fine_tuned_models[best_model_name]
-
-    print(f"\n🏆 Best model: {best_model_name} with F1 Score: {scores[best_model_name]:.2f}")
-    save_model(best_model, model_output_path)
-
+    # Save the model
+    for model_name, model in models.items():
+        model_path = os.path.join(model_output_path, f"{model_name}.pkl")
+        save_model(model, model_path)
 
 if __name__ == "__main__":
     modeling_pipeline()

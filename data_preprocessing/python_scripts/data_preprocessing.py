@@ -28,7 +28,11 @@ age_bins = config["features"]["age_bins"]
 age_labels = config["features"]["age_labels"]
 columns_to_drop = config["features"]["columns_to_drop"]
 
-def clean_null(data):
+def handle_null(data):
+    """Handle missing values with KNN Imputer & drop unwanted columns."""
+    if 'Fare' in data.columns and data['Fare'].isnull().sum() > 0:
+        data['Fare'].fillna(data['Fare'].median(), inplace=True)
+
     """Handle missing values with KNN Imputer & drop unwanted columns."""
     if 'Age' in data.columns:
         knn_imputer = KNNImputer(n_neighbors=5, weights='distance')
@@ -40,17 +44,37 @@ def clean_null(data):
     if 'Embarked' in data.columns:
         data['Embarked'] = data['Embarked'].fillna('S')
 
-    print("✅ Null values cleaned...", flush=True)
+    print("✅ Null values handled...", flush=True)
     return data
 
 def data_transformation(data):
+    """Handle outliers for Age and Fare using the IQR method and remove extreme Fare values (>500)."""
+    numerical_columns = ['Age', 'Fare']
+    
+    for column in numerical_columns:
+        Q1 = data[column].quantile(0.25)
+        Q3 = data[column].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        
+        # Clip outliers to the IQR range
+        data[column] = data[column].clip(lower=lower_bound, upper=upper_bound)
+    
+    # Remove extreme outliers for Fare
+    data = data[data['Fare'] <= 500]
+    
+    print("✅ Data Transformation completed...", flush=True)
+    return data
+
+def data_encoding(data):
     """Convert categorical values into numeric representations."""
     if 'Sex' in data.columns:
         data['Sex'] = data['Sex'].map({'male': 1, 'female': 0})
     if 'Embarked' in data.columns:
         data['Embarked'] = data['Embarked'].map({'S': 0, 'C': 1, 'Q': 2})
 
-    print("✅ Data Transformation completed...", flush=True)
+    print("✅ Data Encoding completed...", flush=True)
     return data
 
 def feature_engineering(data):
@@ -87,8 +111,9 @@ def preprocessing_pipeline():
 
     # Apply preprocessing steps in sequence
     print("\n🔄 Preprocessing train dataset...", flush=True)
-    train_data = clean_null(train_data)
+    train_data = handle_null(train_data)
     train_data = data_transformation(train_data)
+    train_data = data_encoding(train_data)
     train_data = feature_engineering(train_data)
     train_data = drop_columns(train_data)
 

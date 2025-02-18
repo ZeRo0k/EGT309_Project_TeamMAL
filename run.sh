@@ -1,36 +1,69 @@
 #!/bin/bash
 
-# Define file paths for YAML files
-PREPROCESSING_DEPLOYMENT="processing.yaml"
-TRAINING_DEPLOYMENT="training.yaml"
-OPTIMIZATION_DEPLOYMENT="optimization.yaml"
+# Start Minikube and configure Docker
+echo "Starting Minikube..."
+minikube start
+eval $(minikube docker-env)
 
-PREPROCESSING_SERVICE="preprocessing-service.yaml"
-TRAINING_SERVICE="training-service.yaml"
-OPTIMIZATION_SERVICE="optimization-service.yaml"
+# Create necessary directories in Minikube
+echo "Creating directories in Minikube..."
+minikube ssh -- "sudo mkdir -p /mnt/data/datasets/raw_datasets && sudo mkdir -p /mnt/data/datasets/cleaned_datasets && sudo mkdir -p /mnt/data/saved_model"
 
-# Apply Kubernetes configurations
-echo "Deploying Preprocessing Service..."
-kubectl apply -f $PREPROCESSING_DEPLOYMENT
-kubectl apply -f $PREPROCESSING_SERVICE
-echo "Preprocessing Service Deployed!"
+# Copy datasets into Minikube
+echo "Copying datasets to Minikube..."
+minikube cp /mnt/c/Users/User/OneDrive/Documents/NYP_Year_3/EGT309/MAL_Project/MAL_Project/datasets/raw_datasets/train.csv /mnt/data/datasets/raw_datasets/train.csv
 
-echo "Deploying Training Service..."
-kubectl apply -f $TRAINING_DEPLOYMENT
-kubectl apply -f $TRAINING_SERVICE
-echo "Training Service Deployed!"
+# Give full permissions for files
+minikube ssh -- "sudo chmod -R 777 /mnt/data/datasets/raw_datasets && sudo chmod -R 777 /mnt/data/datasets/cleaned_datasets && sudo chmod -R 777 /mnt/data/saved_model"
 
-echo "Deploying Optimization Service..."
-kubectl apply -f $OPTIMIZATION_DEPLOYMENT
-kubectl apply -f $OPTIMIZATION_SERVICE
-echo "Optimization Service Deployed!"
+# Build Docker images
+echo "Building Docker images..."
+docker build -t zerook2005/data-preprocessing:latest -f data_preprocessing/docker/Dockerfile .
+docker build -t zerook2005/model-training:latest -f model_training/docker/Dockerfile .
+docker build -t zerook2005/model-optimization:latest -f model_optimization/docker/Dockerfile .
+docker build -t zerook2005/app:latest -f app/docker/Dockerfile .
 
-# Check the status of pods
-echo "Checking Pod Status..."
+echo "Pushing Docker images to Docker Hub..."
+docker push zerook2005/data-preprocessing:latest
+docker push zerook2005/model-training:latest
+docker push zerook2005/model-optimization:latest
+docker push zerook2005/app:latest
+
+# Apply Kubernetes PVs/PVCs
+echo "Applying Kubernetes configurations..."
+kubectl apply -f storage/pv_raw.yaml
+kubectl apply -f storage/pvc_raw.yaml
+kubectl apply -f storage/pv_cleaned.yaml
+kubectl apply -f storage/pvc_cleaned.yaml
+kubectl apply -f storage/pv_model.yaml
+kubectl apply -f storage/pvc_model.yaml
+
+# Apply Kubernetes Jobs/Deployments
+kubectl apply -f data_preprocessing/docker/job.yaml
+kubectl apply -f model_training/docker/job.yaml
+kubectl apply -f model_optimization/docker/job.yaml
+kubectl apply -f app/docker/deployment.yaml
+kubectl apply -f app/docker/service.yaml
+
+# Optional Kubernetes Scaling, Rollouts, and Rollbacks (for presentation)
+read -p "Do you want to perform scaling or rollout operations now? (y/n): " answer
+if [[ $answer == "y" ]]; then
+  echo "Adding scaling, rollout, and rollback capabilities..."
+  kubectl scale deployment streamlit-app --replicas=3
+  kubectl rollout status deployment streamlit-app
+  kubectl rollout history deployment streamlit-app
+  kubectl rollout undo deployment streamlit-app
+else
+  echo "Skipping scaling and rollout operations."
+fi
+
+# Check the status of pods and services
+echo "Checking status of Kubernetes resources..."
 kubectl get pods
-
-# Verify the services
-echo "Checking Service Status..."
 kubectl get services
 
-echo "All services and deployments are successfully applied!"
+# Open the Streamlit app
+echo "Launching Streamlit app..."
+minikube service streamlit-service
+
+echo "Minikube setup, Docker image build, and application deployment completed!"

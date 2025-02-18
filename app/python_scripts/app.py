@@ -6,7 +6,7 @@ import yaml
 
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'data_preprocessing', 'python_scripts'))
-from data_preprocessing import clean_null, data_transformation, feature_engineering, drop_columns
+from data_preprocessing import handle_null, data_encoding, feature_engineering, drop_columns
 
 # Load config
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -131,8 +131,8 @@ elif app_mode == "Batch Prediction":
             # categorical_columns = file_df.select_dtypes(exclude=["number"]).columns
 
             # Apply preprocessing steps to the batch data
-            file_df = clean_null(file_df)
-            file_df = data_transformation(file_df)
+            file_df = handle_null(file_df)
+            file_df = data_encoding(file_df)
             file_df = feature_engineering(file_df)
             file_df = drop_columns(file_df)
 
