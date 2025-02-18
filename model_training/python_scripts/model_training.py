@@ -130,7 +130,8 @@ def save_model(model, output_path):
 # 1) Loading the dataset from a predefined path.
 # 2) Splitting the data into training and testing sets.
 # 3) Training multiple models (Logistic Regression, Random Forest, Gradient Boosting).
-# 4) Saving the trained models for future use.
+# 4) Evaluate the trained models.
+# 5) Saving the trained models for future use.
 
 def modeling_pipeline():
     if not os.path.exists(cleaned_train_data_path):
