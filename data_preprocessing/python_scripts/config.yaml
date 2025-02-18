@@ -1,10 +1,8 @@
-# Configuration for data preprocessing pipeline
+# This configuration file defines paths for data storage and feature engineering settings used in the preprocessing pipeline.
 
 paths:
   raw_train: /datasets/raw_datasets/train.csv
-  raw_test: /datasets/raw_datasets/test.csv
   cleaned_train: /datasets/cleaned_datasets/cleaned_train_data.csv
-  cleaned_test: /datasets/cleaned_datasets/cleaned_test_data.csv
 
 features:
   imputation:
@@ -26,10 +24,3 @@ features:
     - PassengerId
     - Ticket
     - Name
-
-
-
-
-
-
-
