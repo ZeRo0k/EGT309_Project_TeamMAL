@@ -1,45 +1,63 @@
+# This YAML file defines a Kubernetes Job that runs the data preprocessing pipeline. Unlike Deployments, Jobs 
+# are used for batch processing tasks that execute once and complete rather than running continuously.
+#
+# - This Job runs the data preprocessing pipeline once and exits.
+# - The `restartPolicy: OnFailure` ensures retries only when failures occur.
+# - `backoffLimit: 3` allows up to 3 retries before marking the job as failed.
+# - Persistent volumes are mounted to allow access to datasets.
+# - Resources are allocated to prevent excessive memory/CPU usage.
+
 apiVersion: batch/v1
-kind: Job
+kind: Job  # Specifies that this is a batch Job, which runs to completion
 metadata:
-  name: data-preprocessing-job
+  name: data-preprocessing-job  # Unique name for the job
   labels:
-    app: data-preprocessing
+    app: data-preprocessing  # Label to identify the job
+
 spec:
-  backoffLimit: 3 # Self Healing
+  backoffLimit: 3  # Self-Healing: The job will retry up to 3 times if it fails
   template:
     metadata:
       labels:
-        app: data-preprocessing
+        app: data-preprocessing  # Label applied to the job pods
+
     spec:
-      restartPolicy: OnFailure # Restart if fails
+      restartPolicy: OnFailure  # Ensures pod restarts if it fails, but not on success
+
       containers:
-        - name: data-preprocessing-container
-          image: zerook2005/data-preprocessing:latest
-          imagePullPolicy: IfNotPresent
-          command:
+        - name: data-preprocessing-container  # Name of the container running the preprocessing task
+          image: thisisangelz/data-preprocessing:latest  # Docker image to use for this job
+          imagePullPolicy: IfNotPresent  # Pull image only if not available locally 
+
+          command:  # Command to execute within the container
             [
               "/bin/sh",
               "-c",
               "python3 /app/python_scripts/data_preprocessing.py",
             ]
-          resources: # Resource allocation for the container
+
+          resources:  # Resource allocation settings to ensure efficient performance
             requests:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "512Mi"  # Minimum memory the container is guaranteed
+              cpu: "500m"  # Minimum CPU allocated (0.5 vCPU)
             limits:
-              memory: "1Gi"
-              cpu: "1"
-          volumeMounts:
+              memory: "1Gi"  # Maximum memory allowed
+              cpu: "1"  # Maximum CPU allowed (1 vCPU)
+
+          volumeMounts:  # Mounts persistent volumes for data storage
             - name: raw-data
-              mountPath: "/datasets/raw_datasets"
-              readOnly: false
+              mountPath: "/datasets/raw_datasets"  # Mount path for raw datasets
+              readOnly: false  # Allow read/write access
             - name: cleaned-data
-              mountPath: "/datasets/cleaned_datasets"
-              readOnly: false
-      volumes:
+              mountPath: "/datasets/cleaned_datasets"  # Mount path for cleaned datasets
+              readOnly: false  # Allow read/write access
+
+      volumes:  # Define persistent volumes to ensure data persistence across job executions
         - name: raw-data
           persistentVolumeClaim:
-            claimName: raw-data-pvc # Uses PVC for raw datasets
+            claimName: raw-data-pvc  # PVC for raw datasets storage
         - name: cleaned-data
           persistentVolumeClaim:
-            claimName: cleaned-data-pvc # Uses PVC for cleaned datasets
+            claimName: cleaned-data-pvc  # PVC for cleaned datasets storage
+
+

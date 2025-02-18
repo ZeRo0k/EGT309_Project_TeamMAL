@@ -1,5 +1,8 @@
+# This Dockerfile defines the environment for the data preprocessing pipeline. 
+# It sets up a minimal Python environment, installs dependencies, and runs the preprocessing script automatically.
+
 # Base image
-FROM python:3.10-slim
+FROM python:3.10-slim 
 
 # Set working directory
 WORKDIR /app
