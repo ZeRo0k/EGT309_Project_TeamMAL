@@ -3,7 +3,6 @@
 # 2) Model Training: Trains multiple models (Logistic Regression, Random Forest, Gradient Boosting) using the training data.
 # 3) Evaluating Trained Models
 # 4) Model Evaluation: Evaluates the models based on their accuracy, precision, recall, and F1 score.
-# 5) Model Saving: Saves the trained models for later use.
 
 import pandas as pd 
 import joblib 
@@ -30,7 +29,6 @@ model_output_path = config["paths"]["model_output"]
 target_column = config["parameters"]["target_column"]
 test_size = config["parameters"]["test_size"]
 random_state = config["parameters"]["random_state"]
-fine_tuning_params = config["fine_tuning"]
 
 # ------------------------------------------------------------
 # Function 1: Splitting the Data for Training and Testing
@@ -100,29 +98,6 @@ def evaluate_model(model, X_test, y_test):
     
     return metrics["F1 Score"]
 
-
-# ------------------------------------------------------------
-# Function 4: Saving the Trained Models
-# ------------------------------------------------------------
-# This function saves the trained model as a .pkl file to the specified output directory. If the directory doesn’t exist, 
-# it is created, and any existing model file is replaced to ensure the latest version is stored.
-
-def save_model(model, output_path):
-    directory = os.path.dirname(output_path)
-    
-    # Ensure `directory` is actually a directory, not a file
-    if not os.path.isdir(directory):
-        os.makedirs(directory, exist_ok=True)
-    
-    # Remove the existing file before saving a new model
-    if os.path.exists(output_path):
-        os.remove(output_path)
-
-    joblib.dump(model, output_path)
-    print(f"✅ Model saved to {output_path}")
-
-
-
 # ------------------------------------------------------------
 # Model Training Pipeline Execution
 # ------------------------------------------------------------
@@ -131,7 +106,6 @@ def save_model(model, output_path):
 # 2) Splitting the data into training and testing sets.
 # 3) Training multiple models (Logistic Regression, Random Forest, Gradient Boosting).
 # 4) Evaluate the trained models.
-# 5) Saving the trained models for future use.
 
 def modeling_pipeline():
     if not os.path.exists(cleaned_train_data_path):
@@ -154,11 +128,6 @@ def modeling_pipeline():
     for model_name, model in models.items():
         print(f"\n🔍 Evaluating {model_name}...")
         evaluate_model(model, X_test, y_test)
-
-    # Save the model
-    for model_name, model in models.items():
-        model_path = os.path.join(model_output_path, f"{model_name}.pkl")
-        save_model(model, model_path)
 
 if __name__ == "__main__":
     modeling_pipeline()
