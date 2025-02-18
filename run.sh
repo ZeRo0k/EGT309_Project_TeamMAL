@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Ensure the script has correct permissions
@@ -38,7 +37,7 @@ declare -a files=(
 
 echo "🔄 Updating Docker Hub username in all configuration files..."
 for file in "${files[@]}"; do
-  sed -i "s|thisisangelz|$docker_username|g" "$file"
+  sed -i "s|zerook2005|$docker_username|g" "$file"
 done
 
 echo "✅ Updated all files with Docker username: $docker_username"
