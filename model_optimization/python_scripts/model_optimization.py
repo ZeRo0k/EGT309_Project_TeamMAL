@@ -4,7 +4,6 @@ import yaml
 import os
 import joblib
 import sys
-
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
@@ -44,67 +43,97 @@ def split_data(data, target_column, test_size, random_state):
 # Function 2: Training the Model with Fine-Tuning
 # ------------------------------------------------------------
 
-def train_model_with_fine_tuning(X_train, y_train, model_type, params):
-    kfold = StratifiedKFold(n_splits=2, shuffle=True, random_state=random_state)
+def train_model_with_fine_tuning(X_train, y_train, config_path='config.yaml'):
+    # Load hyperparameters from config.yaml
+    with open(config_path, 'r') as file:
+        config = yaml.safe_load(file)
+
+    model_type = config.get('model_type')
+    if not model_type:
+        raise ValueError("❌ No model type specified in config.yaml")
+
+    if model_type not in config:
+        raise ValueError(f"❌ Hyperparameters for {model_type} not found in config.yaml")
+
+    param_grid = config[model_type]
+    cv_config = config.get('cross_validation')
+
+    kfold = StratifiedKFold(n_splits=cv_config['n_splits'], shuffle=cv_config['shuffle'], random_state=cv_config['random_state'])
 
     models = {
-        "logistic_regression": Pipeline([
+        "logistic_regression": lambda p: Pipeline([
             ('scaler', StandardScaler()), 
             ('model', LogisticRegression(
-                C=params.get("C", 0.5),
-                penalty=params.get("penalty", "l1"),
-                solver=params.get("solver", "saga"),
-                max_iter=params.get("max_iter", 5000),
+                C=p["C"],
+                penalty=p["penalty"],
+                solver=p["solver"],
+                max_iter=p["max_iter"],
                 class_weight="balanced",
-                random_state=random_state,
+                random_state=cv_config['random_state'],
             ))
         ]),
-        "random_forest": RandomForestClassifier(
-            n_estimators=params.get("n_estimators", 500),
-            max_depth=params.get("max_depth", 15),
-            min_samples_split=params.get("min_samples_split", 10),
+        "random_forest": lambda p: RandomForestClassifier(
+            n_estimators=p["n_estimators"],
+            max_depth=p["max_depth"],
+            min_samples_split=p["min_samples_split"],
             n_jobs=-1,
-            random_state=random_state,
+            random_state=cv_config['random_state'],
         ),
-        "gradient_boosting": Pipeline([
+        "gradient_boosting": lambda p: Pipeline([
             ('scaler', StandardScaler()), 
             ('model', GradientBoostingClassifier(
-                n_estimators=params.get("n_estimators", 300),
-                max_depth=params.get("max_depth", 6),
-                min_samples_split=params.get("min_samples_split", 10),
-                learning_rate=params.get("learning_rate", 0.1),
-                random_state=random_state,
+                n_estimators=p["n_estimators"],
+                max_depth=p["max_depth"],
+                min_samples_split=p["min_samples_split"],
+                learning_rate=p["learning_rate"],
+                random_state=cv_config['random_state'],
             ))
         ])
     }
 
     if model_type == "voting_ensemble":
-        models["voting_ensemble"] = Pipeline([
-            ('voting', VotingClassifier(
-                estimators=[
-                    ('logistic', models["logistic_regression"]),
-                    ('random_forest', models["random_forest"]),
-                    ('gradient_boosting', models["gradient_boosting"]),
-                ],
-                voting='soft',
-                n_jobs=-1
-            ))
-        ])
+        models["voting_ensemble"] = lambda p: VotingClassifier(
+            estimators=[
+                ('logistic', models["logistic_regression"](p)),
+                ('random_forest', models["random_forest"](p)),
+                ('gradient_boosting', models["gradient_boosting"](p)),
+            ],
+            voting='soft',
+            n_jobs=-1
+        )
 
     if model_type not in models:
         raise ValueError("❌ Invalid model_type.")
 
-    model = models[model_type]
+    # Generate parameter combinations
+    param_keys = list(param_grid.keys())
+    param_combinations = []
+    for values in zip(*param_grid.values()):
+        param_combinations.append(dict(zip(param_keys, values)))
 
-    # Perform Cross-Validation
-    scores = cross_val_score(model, X_train, y_train, cv=kfold, scoring='accuracy')
-    print(f"{model_type} Cross-Validation Accuracy Scores: {scores}")
-    print(f"{model_type} Mean Accuracy: {np.mean(scores):.4f}\n")
+    best_score = 0
+    best_params = None
+    best_model = None
 
-    # Train the specified model
-    model.fit(X_train, y_train)
+    for params in param_combinations:
+        print(f"Training {model_type} with params: {params}")
+        model = models[model_type](params)
+
+        scores = cross_val_score(model, X_train, y_train, cv=kfold, scoring='accuracy', n_jobs=-1)
+        mean_score = np.mean(scores)
+        print(f"Cross-Validation Accuracy: {scores} | Mean Accuracy: {mean_score:.4f}")
+
+        if mean_score > best_score:
+            best_score = mean_score
+            best_params = params
+            best_model = model
+
+    print(f"✅ Best Model ({model_type}) found with params: {best_params} | Best Accuracy: {best_score:.4f}")
+
+    best_model.fit(X_train, y_train)
     print(f"✅ Model ({model_type}) trained with fine-tuning.")
-    return model
+    return best_model
+
 
 
 # ------------------------------------------------------------
@@ -150,18 +179,23 @@ def optimization_pipeline():
 
     X_train, X_test, y_train, y_test = split_data(cleaned_train_data, target_column, test_size, random_state)
 
-    fine_tuned_models = {
-        model: train_model_with_fine_tuning(X_train, y_train, model, fine_tuning_params[model])
-        for model in fine_tuning_params
-    }
+    # Call the train_model_with_fine_tuning function from external module
+    fine_tuned_model = train_model_with_fine_tuning(X_train, y_train, config_path='config.yaml')
 
-    scores = {model: evaluate_model(fine_tuned_models[model], X_test, y_test) for model in fine_tuned_models}
-    best_model_name = max(scores, key=scores.get)
-    best_model = fine_tuned_models[best_model_name]
+    # Evaluate the trained model
+    f1_score = evaluate_model(fine_tuned_model, X_test, y_test)
 
-    print(f"\n🏆 Best model: {best_model_name} with F1 Score: {scores[best_model_name]:.2f}")
-    save_model(best_model, model_output_path)
+    print(f"\n🏆 Best model trained with an F1 Score of {f1_score:.2f}")
+    save_model(fine_tuned_model, model_output_path)
+
+
+    # fine_tuned_model = {
+    #     model: train_model_with_fine_tuning(X_train, y_train, model, fine_tuning_params[model])
+    #     for model in fine_tuning_params
+    # }
 
 
 if __name__ == "__main__":
     optimization_pipeline()
+
+

@@ -7,19 +7,31 @@ parameters:
   test_size: 0.2
   random_state: 42
 
-fine_tuning:
-  logistic_regression:
-    C: 0.5
-    penalty: "l1"
-    solver: "saga"
-    max_iter: 5000
-  random_forest:
-    n_estimators: 500
-    max_depth: 15
-    min_samples_split: 10
-  gradient_boosting:
-    n_estimators: 300
-    max_depth: 6
-    min_samples_split: 10
-    learning_rate: 0.1
-  voting_ensemble: {}
+# Model Type Selection
+model_type: ""
+
+# Logistic Regression Hyperparameters
+logistic_regression:
+  C: [0.1, 0.5, 1.0, 2.0] # Inverse of regularization strength
+  penalty: ["l1", "l2"] # Regularization norm
+  solver: "saga" # Solver for optimization
+  max_iter: 5000 # Maximum iterations
+
+# Random Forest Hyperparameters
+random_forest:
+  n_estimators: [100, 500, 1000] # Number of trees in the forest
+  max_depth: [10, 15, 20] # Maximum depth of each tree
+  min_samples_split: [5, 10] # Minimum samples to split a node
+
+# Gradient Boosting Hyperparameters
+gradient_boosting:
+  n_estimators: [100, 300, 500] # Number of boosting stages
+  max_depth: [4, 6, 8] # Maximum depth of individual trees
+  min_samples_split: [5, 10] # Minimum samples to split a node
+  learning_rate: [0.05, 0.1, 0.2] # Step size shrinkage
+
+# Cross-Validation Settings
+cross_validation:
+  n_splits: 5 # Number of folds
+  shuffle: true # Shuffle data before splitting
+  random_state: 42 # Seed for reproducibility
