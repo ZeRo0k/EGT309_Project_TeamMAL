@@ -1,3 +1,8 @@
+# This file defines essential configurations used in the Streamlit application.
+# It includes:
+# - Model Path: Location of the trained and optimized ML model.
+# - Feature List: The exact features required for prediction.
+
 paths:
   saved_model: "/saved_model/optimized_model.pkl"
 
