@@ -287,7 +287,7 @@ eg. cd /mnt/c/Users/john/Downloads/EGT309_Project_TeamMAL-main/EGT309_Project_Te
 ```
 > ./run.sh
 ```
-Run this code first if there is no permission
+Run this code first if you cannot run 'run.sh' directly.
 ```
 > chmod +x run.sh
 ```
