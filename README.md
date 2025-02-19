@@ -300,7 +300,7 @@ This project follows a **structured Git workflow** using **GitHub for version co
 ### Branching Structure
 📌 **`main` branch** – Production-ready, stable, and tested code is merged here.  
 
-📌 **Individual branches** (`member1-branch`, `member2-branch`, `member3-branch`) – Each team member worked in their own branch to develop:
+📌 **Individual branches** (`angel-branch`, `limenhuai-branch`, `mock-branch`) – Each team member worked in their own branch to develop:
 - Data Preprocessing
 - Model Training
 - Model Optimization
