@@ -291,7 +291,10 @@ Run this code first if you cannot run 'run.sh' directly.
 ```
 > chmod +x run.sh
 ```
+
+###### Note: To pull/push into Docker Hub, change the docker username under each deployment/job.yaml files first.
 ---
+
 
 ## 6. Version Control 
 
