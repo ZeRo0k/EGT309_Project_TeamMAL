@@ -111,11 +111,17 @@ EGT309_Project_TeamMAL-main/
  
 **Overview of system architecture diagram:**
 This section provides a comprehensive overview of the Kubernetes system architecture, detailing the key components and workflow involved in data processing, model training, and application deployment. The architecture is designed to ensure efficient resource management, scalability, and high availability within a Minikube environment.
+
 The system is initialized on a local machine, where the developer creates and manages a Kubernetes cluster using Minikube. The setup process involves configuring Persistent Volumes (PVs) and Persistent Volume Claims (PVCs) to store different types of data across various processing stages.
+
 Initially, a raw data PV is created to store unprocessed data uploaded from the local machine. The data preprocessing job accesses the raw data PV through a PVC, retrieving the data for cleaning and transformation. Once preprocessing is completed, the cleaned data is stored in a cleaned data PV, ensuring that subsequent processes operate on refined data.
+
 The model training and optimization jobs then access the cleaned data PV via the cleaned data PVC. These jobs train machine learning models using different hyperparameters. To optimize storage efficiency, only the best-performing model from the model optimization process is retained in a model PV, ensuring that redundant models do not consume unnecessary storage.
+
 Following model training and selection, the application deployment component retrieves the best-trained model from the model PV via the model PVC. The retrieved model is then used within the deployed application, which runs on Kubernetes pods with replicas to enhance availability and reliability.
+
 On the user side, user requests are sent to a load balancer, which manages incoming traffic by directing it to the appropriate service. The Kubernetes service then exposes the application’s port externally, allowing users to interact with the deployed model through a web server interface. 
+
 This architecture ensures seamless integration between data processing, model training, and real-time application access while maintaining scalability and fault tolerance. This structured approach facilitates efficient resource utilization, supports high-availability applications, and enables automated model deployment in a Kubernetes-based environment.
 
 ---
@@ -293,7 +299,7 @@ This project follows a **structured Git workflow** using **GitHub for version co
 ### Branching Structure
 📌 **`main` branch** – Production-ready, stable, and tested code is merged here.  
 
-📌 **Individual branches** (`member1-branch`, `member2-branch`, `member3-branch`) – Each team member worked in their own branch to develop:
+📌 **Individual branches** (`angel-branch`, `limenhuai-branch`, `mock-branch`) – Each team member worked in their own branch to develop:
 - Data Preprocessing
 - Model Training
 - Model Optimization
