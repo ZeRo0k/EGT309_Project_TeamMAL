@@ -315,6 +315,3 @@ This project follows a **structured Git workflow** using **GitHub for version co
 ✅ **Merge & Conflict Resolution** – Conflicts were handled using **interactive rebasing** or **manual resolution** before merging.  
 
 ✅ **Issue Tracking** – GitHub **Issues** were used for tracking bugs, improvements, and module-specific discussions.  
-
-📂 **Additional Documentation:**  
-A separate document contains **Git commands, outputs, and troubleshooting steps**, structured similarly to the **EGT309 Labs instructions**, serving as a technical reference.
