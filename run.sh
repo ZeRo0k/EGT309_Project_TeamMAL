@@ -130,16 +130,55 @@ echo "📜 Streaming logs for model optimization..."
 kubectl wait --for=condition=complete job/model-optimization-job --timeout=300s && \
 kubectl logs -f job/model-optimization-job
 
-# ------------------- OPTIONAL: SCALING & ROLLBACK -------------------
-read -p "Do you want to perform scaling or rollout operations now? (y/n): " scale_choice
+# ------------------- OPTIONAL: SCALING, SELF-HEALING & ROLLBACK CHECK -------------------
+read -p "Do you want to check scaling, self-healing, and perform rollout/rollback operations? (y/n): " scale_choice
 if [[ $scale_choice == "y" ]]; then
-  echo "📊 Adding scaling, rollout, and rollback capabilities..."
-  kubectl scale deployment streamlit-app --replicas=3
-  kubectl rollout status deployment streamlit-app
-  kubectl rollout history deployment streamlit-app
-  kubectl rollout undo deployment streamlit-app
+  echo "📊 Checking Scaling, Self-Healing, Rollout, and Rollback capabilities..."
+
+  # 1️⃣ Check Scaling
+  echo "🔍 Checking running pods for Streamlit deployment..."
+  kubectl get pods
+
+  # 2️⃣ Check Self-Healing by Deleting a Pod
+  echo "🛠 Testing Self-Healing: Deleting one Streamlit pod..."
+  POD_NAME=$(kubectl get pods -l app=streamlit-app -o jsonpath="{.items[0].metadata.name}")
+  kubectl delete pod $POD_NAME
+  echo "⏳ Waiting for Kubernetes to self-heal..."
+  sleep 10
+  echo "✅ Self-healing test completed. Checking pod status..."
+  kubectl get pods
+
+  # 3️⃣ Perform Rollout and Rollback Testing
+  echo "🚀 Checking rollout update..."
+  kubectl rollout status deployment/streamlit-app
+  kubectl rollout history deployment/streamlit-app
+
+  REVISION_COUNT=$(kubectl rollout history deployment/streamlit-app | wc -l)
+
+  if [[ $REVISION_COUNT -le 2 ]]; then
+    echo "⚠️ Only one deployment revision exists. Creating a new revision..."
+    
+    # Update deployment to create a new revision
+    NEW_IMAGE="zerook2005/app:v2"
+    echo "🔄 Updating deployment image to: $NEW_IMAGE"
+    kubectl set image deployment/streamlit-app streamlit-app=$NEW_IMAGE
+    
+    # Annotate for tracking rollback history
+    kubectl annotate deployment streamlit-app kubernetes.io/change-cause="Updated to v2"
+
+    # Wait for the new rollout to complete
+    kubectl rollout status deployment/streamlit-app
+  fi
+
+  # Now we have two revisions, proceed with rollback
+  echo "⏪ Rolling back to previous version..."
+  kubectl rollout undo deployment/streamlit-app --to-revision=1
+  kubectl rollout status deployment/streamlit-app
+  kubectl rollout history deployment/streamlit-app
+  kubectl get pods
+
 else
-  echo "⏩ Skipping scaling and rollout operations."
+  echo "⏩ Skipping scaling, self-healing, and rollout operations."
 fi
 
 # ------------------- CHECK POD & SERVICE STATUS -------------------
