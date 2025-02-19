@@ -1,10 +1,12 @@
+# This file is a YAML file for creating the Persistent Volume used for storing trained models
+
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: pv-model
 spec:
   capacity:
-    storage: 100Mi # Adjust if needed
+    storage: 100Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
