@@ -106,7 +106,7 @@ EGT309_Project_TeamMAL-main/
 
 ###
 #### **High-Level Architecture Diagram**
-![alt text](<system architecture diagram-1.png>)
+![alt text](<System Architecture Diagram.png>)
 
  
 **Overview of system architecture diagram:**
