@@ -1,3 +1,5 @@
+# This file is a YAML file for creating the Persistent Volume claim used to access the raw data pv
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
