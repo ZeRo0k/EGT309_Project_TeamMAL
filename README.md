@@ -110,6 +110,7 @@ EGT309_Project_TeamMAL-main/
 
  
 **Overview of system architecture diagram:**
+
 This section provides a comprehensive overview of the Kubernetes system architecture, detailing the key components and workflow involved in data processing, model training, and application deployment. The architecture is designed to ensure efficient resource management, scalability, and high availability within a Minikube environment.
 The system is initialized on a local machine, where the developer creates and manages a Kubernetes cluster using Minikube. The setup process involves configuring Persistent Volumes (PVs) and Persistent Volume Claims (PVCs) to store different types of data across various processing stages.
 Initially, a raw data PV is created to store unprocessed data uploaded from the local machine. The data preprocessing job accesses the raw data PV through a PVC, retrieving the data for cleaning and transformation. Once preprocessing is completed, the cleaned data is stored in a cleaned data PV, ensuring that subsequent processes operate on refined data.
