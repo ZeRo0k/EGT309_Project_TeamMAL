@@ -16,7 +16,7 @@ if [[ -z "$docker_username" ]]; then
 fi
 
 # ------------------- USER INPUT: PROJECT DIRECTORY PATH -------------------
-read -p "Enter the full path where the project folder (EGT309_Project_TeamMAL-main) is located: " project_path
+read -p "Enter the full path where the project folder (EGT309_Project_TeamMAL-main) is located in your device: " project_path
 
 # Validate project path input
 if [[ ! -d "$project_path" ]]; then
