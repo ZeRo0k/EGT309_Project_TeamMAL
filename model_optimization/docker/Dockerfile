@@ -1,3 +1,6 @@
+# This Dockerfile builds the model optimization container image.
+# It sets up the environment, installs dependencies, and executes model optimization.
+
 # Base image
 FROM python:3.10-slim
 

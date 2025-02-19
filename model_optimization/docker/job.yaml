@@ -1,3 +1,10 @@
+# This YAML defines a Kubernetes Job that runs model optimization.
+# A Job (instead of a Deployment) is used because:
+# - The model optimization process only needs to run once.
+# - The optimized model is stored in persistent volume (PV), so it doesn’t need to keep running.
+# - Kubernetes ensures completion, and failed jobs retry up to 3 times for reliability.
+# - The Job automatically stops after execution, reducing resource usage.
+
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -14,8 +21,8 @@ spec:
       restartPolicy: OnFailure # Restart if fails
       containers:
         - name: model-optimization-container
-          image: zerook2005/model-optimization:latest
-          imagePullPolicy: IfNotPresent
+          image: zerook2005/model-optimization:latest # Pulls the latest model optimization image
+          imagePullPolicy: IfNotPresent # Use local image if available; pull if not
           command:
             [
               "/bin/sh",
@@ -30,7 +37,7 @@ spec:
       volumes:
         - name: cleaned-data
           persistentVolumeClaim:
-            claimName: cleaned-data-pvc
+            claimName: cleaned-data-pvc # Access persistent storage for cleaned data
         - name: saved-models
           persistentVolumeClaim:
-            claimName: saved-model-pvc
+            claimName: saved-model-pvc # Access persistent storage for models
